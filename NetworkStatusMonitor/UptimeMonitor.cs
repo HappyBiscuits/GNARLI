@@ -4,19 +4,15 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace NetworkStatusMonitor
+namespace GNARLI
 {
 
     public class UptimeSettings
     {
         
     }
-    public class UptimeLogger
-    {
-        
-    }
-
     public class UpTimeLog
     {
         public IpAddressData Address;
@@ -32,7 +28,8 @@ namespace NetworkStatusMonitor
                 {
                     Date = date,
                     Ping = rand.Next(1000),
-                    Success = true,
+                    Status = IPStatus.Success,
+                    Success = true
                     
                 };
                 Pings.Add(ping);
@@ -43,12 +40,15 @@ namespace NetworkStatusMonitor
     public class PingResult
     {
         public DateTime Date;
+        public IPStatus Status;
         public bool Success;
         public int Ping;
     }
 
     public class UptimeMonitor
     {
+        public UptimeLogger uptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"));
+
         public List<IpAddressData> IpAddresses = new List<IpAddressData>()
         {
             new IpAddressData("Google DNS", IPAddress.Parse("8.8.8.8")),
@@ -95,6 +95,8 @@ namespace NetworkStatusMonitor
                     CheckConnections();
 
                 }
+
+
                 Thread.Sleep(SleepInterval);
 
             } while (!_stop);
@@ -139,6 +141,10 @@ namespace NetworkStatusMonitor
                 address.SuccessCount++;
             }
 
+            Task.Factory.StartNew(() =>
+            {
+                uptimeLogger.Log(reply);
+            });
         }
 
         private void AnalyseData()
@@ -171,11 +177,6 @@ namespace NetworkStatusMonitor
                     ActiveFail = null;
                 }
             }
-
-
-
-
-            
 
 
         }
