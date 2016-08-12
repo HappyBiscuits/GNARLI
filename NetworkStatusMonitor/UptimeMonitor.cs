@@ -56,7 +56,7 @@ namespace GNARLI
         public int SuccessCount = 0;
         public int PartialCount = 0;
         public int FailCount = 0;
-        public UptimeLogger uptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"));
+        public UptimeLogger UptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"));
 
         public List<IpAddressData> IpAddresses => _config.IpAddressData;
         public List<IpAddressData> AddAddresses = new List<IpAddressData>();  
@@ -147,7 +147,7 @@ namespace GNARLI
 
             Task.Factory.StartNew(() =>
             {
-                uptimeLogger.LogPingReply(reply);
+                UptimeLogger.LogPingReply(reply);
             });
         }
 
@@ -179,7 +179,7 @@ namespace GNARLI
                     ActiveFail.ReturnTime = DateTime.UtcNow;
                     PreviousFails.Add(ActiveFail);
 
-                    uptimeLogger.LogActiveFail(ActiveFail);
+                    UptimeLogger.LogActiveFail(ActiveFail);
 
                     ActiveFail = null;
 
