@@ -22,7 +22,7 @@ namespace GNARLI
                     log.Info($"{pingReply.Status.ToString()} : {pingReply.Address.MapToIPv4()} : {pingReply.RoundtripTime}");
 
                 else
-                    log.Info($"{pingReply.Status.ToString()} : {pingReply.Address.MapToIPv4()}");
+                    log.Info($"{pingReply.Status.ToString()}");
             }
         }
     }
