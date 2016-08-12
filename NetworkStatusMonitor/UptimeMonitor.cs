@@ -4,19 +4,14 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace GNARLI
 {
-
     public class UptimeSettings
     {
         
     }
-    public class UptimeLogger
-    {
-        
-    }
-
     public class UpTimeLog
     {
         public IpAddressData Address;
@@ -32,7 +27,8 @@ namespace GNARLI
                 {
                     Date = date,
                     Ping = rand.Next(1000),
-                    Success = true,
+                    Status = IPStatus.Success,
+                    Success = true
                     
                 };
                 Pings.Add(ping);
@@ -43,6 +39,7 @@ namespace GNARLI
     public class PingResult
     {
         public DateTime Date;
+        public IPStatus Status;
         public bool Success;
         public int Ping;
     }
@@ -59,6 +56,8 @@ namespace GNARLI
         public int SuccessCount = 0;
         public int PartialCount = 0;
         public int FailCount = 0;
+        public UptimeLogger uptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"));
+
         public List<IpAddressData> IpAddresses = new List<IpAddressData>()
         {
             new IpAddressData("Google DNS", IPAddress.Parse("8.8.8.8")),
@@ -66,7 +65,7 @@ namespace GNARLI
             new IpAddressData("Open DNS",IPAddress.Parse("208.67.222.222")),
         };
         public List<IpAddressData> AddAddresses = new List<IpAddressData>();  
-        public List<IpAddressData> RemoveAddresses = new List<IpAddressData>();
+        public List<IpAddressData> RemoveAddresses = new List<IpAddressData>(); 
 
         public UptimeMonitor(Config config)
         {
@@ -103,6 +102,8 @@ namespace GNARLI
                     CheckConnections();
 
                 }
+
+
                 Thread.Sleep(SleepInterval);
 
             } while (!_stop);
@@ -147,6 +148,10 @@ namespace GNARLI
                 address.SuccessCount++;
             }
 
+            Task.Factory.StartNew(() =>
+            {
+                uptimeLogger.LogPingReply(reply);
+            });
         }
 
         private void AnalyseData()
@@ -176,14 +181,14 @@ namespace GNARLI
                 {
                     ActiveFail.ReturnTime = DateTime.UtcNow;
                     PreviousFails.Add(ActiveFail);
+
+                    uptimeLogger.LogActiveFail(ActiveFail);
+
                     ActiveFail = null;
-                }
-            }
-
-
-
 
             
+                }
+            }
 
 
         }
