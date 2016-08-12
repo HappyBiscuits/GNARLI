@@ -1,4 +1,5 @@
-﻿using System.Net.NetworkInformation;
+﻿using System;
+using System.Net.NetworkInformation;
 using log4net;
 
 namespace GNARLI
@@ -14,7 +15,7 @@ namespace GNARLI
             this.logStatus = true;
         }
 
-        public void Log(PingReply pingReply)
+        public void LogPingReply(PingReply pingReply)
         {
             if (logStatus)
             {
@@ -23,6 +24,14 @@ namespace GNARLI
 
                 else
                     log.Info($"{pingReply.Status.ToString()}");
+            }
+        }
+
+        internal void LogActiveFail(FailPeriod activeFail)
+        {
+            if (logStatus)
+            {
+                log.Info($"Active Fail Time: {activeFail.FailTime} : Return Time {activeFail.ReturnTime}");
             }
         }
     }

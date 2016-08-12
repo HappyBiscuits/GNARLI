@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace GNARLI
 {
-
     public class UptimeSettings
     {
         
@@ -143,7 +142,7 @@ namespace GNARLI
 
             Task.Factory.StartNew(() =>
             {
-                uptimeLogger.Log(reply);
+                uptimeLogger.LogPingReply(reply);
             });
         }
 
@@ -174,7 +173,12 @@ namespace GNARLI
                 {
                     ActiveFail.ReturnTime = DateTime.UtcNow;
                     PreviousFails.Add(ActiveFail);
+
+                    uptimeLogger.LogActiveFail(ActiveFail);
+
                     ActiveFail = null;
+
+
                 }
             }
 
