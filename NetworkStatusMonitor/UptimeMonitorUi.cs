@@ -188,6 +188,7 @@ namespace GNARLI
             {
                 var ipaddressData = new IpAddressData(name, addr);
                 _monitor.AddAddresses.Add(ipaddressData);
+
                 Update();
                 return;
             }
@@ -225,6 +226,7 @@ namespace GNARLI
                 {
                     _monitor.RemoveAddresses.Add(_monitor.IpAddresses[val - 1]);
                     Update();
+                    
                     return;
                 }
             }

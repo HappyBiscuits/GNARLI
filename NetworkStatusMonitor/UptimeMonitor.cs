@@ -58,12 +58,7 @@ namespace GNARLI
         public int FailCount = 0;
         public UptimeLogger uptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"));
 
-        public List<IpAddressData> IpAddresses = new List<IpAddressData>()
-        {
-            new IpAddressData("Google DNS", IPAddress.Parse("8.8.8.8")),
-            new IpAddressData("Level 3",IPAddress.Parse("4.2.2.2")),
-            new IpAddressData("Open DNS",IPAddress.Parse("208.67.222.222")),
-        };
+        public List<IpAddressData> IpAddresses => _config.IpAddressData;
         public List<IpAddressData> AddAddresses = new List<IpAddressData>();  
         public List<IpAddressData> RemoveAddresses = new List<IpAddressData>(); 
 
@@ -85,6 +80,7 @@ namespace GNARLI
                 if (AddAddresses.Any())
                 {
                     IpAddresses.AddRange(AddAddresses);
+                    _config.SaveConfig();
                     AddAddresses.Clear();
                 }
                 if (RemoveAddresses.Any())
@@ -92,6 +88,7 @@ namespace GNARLI
                     foreach (var addr in RemoveAddresses)
                     {
                         IpAddresses.Remove(addr);
+                        _config.SaveConfig();
                     }
                     RemoveAddresses.Clear();
                 }

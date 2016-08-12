@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices;
 using IniParser;
 using IniParser.Model;
 
@@ -16,6 +18,72 @@ namespace GNARLI
             new IntConfigValue(ConfigSection.Monitor, ConfigSetting.SleepPeriod, 1000),
 
         };
+
+        public List<IpAddressData> IpAddressData = new List<IpAddressData>()
+        {
+            new IpAddressData("Google DNS", IPAddress.Parse("8.8.8.8")),
+            new IpAddressData("Level 3",IPAddress.Parse("4.2.2.2")),
+            new IpAddressData("Open DNS",IPAddress.Parse("208.67.222.222")),
+        }; 
+
+        private void LoadIpAddressDatas(IniData data)
+        {
+            var loop = true;
+            var i = 0;
+            var addrs = new List<IpAddressData>();
+            do
+            {
+                var dat = "IPAddress" + i;
+                if (data.Sections.ContainsSection(dat))
+                {
+                    addrs.Add(GetIpAddressData(data[dat]));
+                    i++;
+                }
+                else
+                {
+                    loop = false;
+                }
+            } while (loop);
+            if (addrs.Count > 0)
+            {
+                IpAddressData = addrs;
+            }
+            
+
+        }
+
+        private void SaveIpAddressDatas(IniData data)
+        {
+            for (var i = 0; i < IpAddressData.Count; i++)
+            {
+                var dat = "IPAddress" + i;
+                data.Sections.AddSection(dat);
+                data[dat].AddKey("Name", IpAddressData[i].Name);
+                data[dat].AddKey("Address", IpAddressData[i].Ip.ToString());
+            }
+        }
+        private IpAddressData GetIpAddressData(KeyDataCollection data)
+        {
+
+            if (data.ContainsKey("Name") && data.ContainsKey("Address"))
+            {
+                IPAddress ip;
+                if (IPAddress.TryParse(data["Address"], out ip))
+                {
+                    return new IpAddressData(data["Name"], ip);
+                }
+                else
+                {
+                    throw new InvalidDataException(data["Address"] + " is not a valid address");
+                }
+
+            }
+            else
+            {
+                throw new InvalidDataException("Missing Ip Address Data");
+            }
+
+        }
 
         public int GetIntSetting(ConfigSection section, ConfigSetting setting)
         {
@@ -47,8 +115,9 @@ namespace GNARLI
             if (File.Exists(_configPath))
             {
                 data = parser.ReadFile(_configPath);
-
+                LoadIpAddressDatas(data);
             }
+            
             foreach (var setting in Settings)
             {
                 setting.ReadData(data);
@@ -63,6 +132,7 @@ namespace GNARLI
             {
                 setting.WriteData(data);
             }
+            SaveIpAddressDatas(data);
             var parser = new FileIniDataParser();
             parser.WriteFile(_configPath, data);
         }
