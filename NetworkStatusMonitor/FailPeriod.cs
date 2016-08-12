@@ -1,6 +1,6 @@
 using System;
 
-namespace NetworkStatusMonitor
+namespace GNARLI
 {
     public class FailPeriod
     {

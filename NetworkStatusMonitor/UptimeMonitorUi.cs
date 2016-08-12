@@ -3,17 +3,23 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 using System.Threading;
 
-namespace NetworkStatusMonitor
+namespace GNARLI
 {
     public class UptimeMonitorUi
     {
-        public UptimeMonitor Monitor;
+        private Config _config;
+        private UptimeMonitor _monitor;
         public int SleepTime = 500;
         public bool Updating = false;
+
+        public UptimeMonitorUi(Config config, UptimeMonitor monitor)
+        {
+            _config = config;
+            _monitor = monitor;
+        }
+
         public void Update()
         {
             Updating = true;
@@ -75,8 +81,8 @@ namespace NetworkStatusMonitor
                     }
                 case (ConsoleKey.S):
                     {
-                        if (Monitor.IsRunning()) Monitor.StopMonitor();
-                        else new Thread(Monitor.Monitor).Start();
+                        if (_monitor.IsRunning()) _monitor.StopMonitor();
+                        else new Thread(_monitor.Monitor).Start();
                         Options();
                         break;
                     }
@@ -99,7 +105,7 @@ namespace NetworkStatusMonitor
                         int val;
                         if (int.TryParse(dat, out val))
                         {
-                            Monitor.TimeOut = val;
+                            _config.SetIntSetting(ConfigSection.Monitor, ConfigSetting.TimeOut, val);
                             Options();
                         }
                         else
@@ -121,7 +127,7 @@ namespace NetworkStatusMonitor
                         float val;
                         if (float.TryParse(dat, out val))
                         {
-                            Monitor.Interval = val;
+                            _config.SetFloatSetting(ConfigSection.Monitor, ConfigSetting.Frequency, val);
                             Options();
                         }
                         else
@@ -143,7 +149,7 @@ namespace NetworkStatusMonitor
                         int val;
                         if (int.TryParse(dat, out val))
                         {
-                            Monitor.SleepInterval = val;
+                            _config.SetIntSetting(ConfigSection.Monitor, ConfigSetting.SleepPeriod, val);
                             Options();
                         }
                         else
@@ -181,7 +187,7 @@ namespace NetworkStatusMonitor
             if (success)
             {
                 var ipaddressData = new IpAddressData(name, addr);
-                Monitor.AddAddresses.Add(ipaddressData);
+                _monitor.AddAddresses.Add(ipaddressData);
                 Update();
                 return;
             }
@@ -207,7 +213,7 @@ namespace NetworkStatusMonitor
             int val;
             if (int.TryParse(line, out val))
             {
-                if (val > Monitor.IpAddresses.Count)
+                if (val > _monitor.IpAddresses.Count)
                 {
                     Console.WriteLine(val + " is not a valid option.");
                     Console.WriteLine("Press Enter to Continue");
@@ -217,7 +223,7 @@ namespace NetworkStatusMonitor
                 }
                 else
                 {
-                    Monitor.RemoveAddresses.Add(Monitor.IpAddresses[val - 1]);
+                    _monitor.RemoveAddresses.Add(_monitor.IpAddresses[val - 1]);
                     Update();
                     return;
                 }
@@ -245,7 +251,7 @@ namespace NetworkStatusMonitor
         {
             var header = "";
             Console.Write(String.Format("{0,25}", "Monitor: "));
-            if (Monitor.IsRunning())
+            if (_monitor.IsRunning())
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 header = "RUNNING";
@@ -268,9 +274,9 @@ namespace NetworkStatusMonitor
 
         private void Settings()
         {
-            Console.Write(string.Format("{0, 23}", "Timeout: " + Monitor.TimeOut + "ms"));
-            Console.Write(String.Format("{0,23}", "Frequency: " + Monitor.Interval + "s"));
-            Console.Write(String.Format("{0,23}", "Sleep: " + Monitor.SleepInterval + "ms"));
+            Console.Write(string.Format("{0, 23}", "Timeout: " + _monitor.TimeOut + "ms"));
+            Console.Write(String.Format("{0,23}", "Frequency: " + _monitor.Interval + "s"));
+            Console.Write(String.Format("{0,23}", "Sleep: " + _monitor.SleepInterval + "ms"));
             Console.WriteLine();
         }
 
@@ -278,15 +284,15 @@ namespace NetworkStatusMonitor
         {
             Console.Write(string.Format("{0, 22}", "Success: "));
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(Monitor.SuccessCount);
+            Console.Write(_monitor.SuccessCount);
             Console.ResetColor();
             Console.Write(string.Format("{0, 22}", "Partial: "));
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write(Monitor.PartialCount);
+            Console.Write(_monitor.PartialCount);
             Console.ResetColor();
             Console.Write(string.Format("{0, 22}", "Fails: "));
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(Monitor.FailCount);
+            Console.Write(_monitor.FailCount);
             Console.WriteLine();
             Console.ResetColor();
         }
@@ -300,7 +306,7 @@ namespace NetworkStatusMonitor
             Console.WriteLine(string.Format("{0, 18}", "Status"));
             Console.WriteLine(new string('-', 80));
             var count = 1;
-            foreach (var addr in Monitor.IpAddresses)
+            foreach (var addr in _monitor.IpAddresses)
             {
                 PingStatus(addr, count);
                 count++;
@@ -339,11 +345,11 @@ namespace NetworkStatusMonitor
             Console.Write(string.Format("{0, 20}", "End"));
             Console.WriteLine(string.Format("{0, 20}", "Duration"));
             Console.WriteLine(new string('-', 80));
-            if (Monitor.ActiveFail != null)
+            if (_monitor.ActiveFail != null)
             {
-                Fails(Monitor.ActiveFail, true);
+                Fails(_monitor.ActiveFail, true);
             }
-            foreach (var fail in Monitor.PreviousFails.OrderByDescending(x => x.ReturnTime))
+            foreach (var fail in _monitor.PreviousFails.OrderByDescending(x => x.ReturnTime))
             {
                 Fails(fail);
             }

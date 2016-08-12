@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 
-namespace NetworkStatusMonitor
+namespace GNARLI
 {
     public class IpAddressData
     {

@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
 
-namespace NetworkStatusMonitor
+namespace GNARLI
 {
 
     public class UptimeSettings
@@ -49,18 +49,8 @@ namespace NetworkStatusMonitor
 
     public class UptimeMonitor
     {
-        public List<IpAddressData> IpAddresses = new List<IpAddressData>()
-        {
-            new IpAddressData("Google DNS", IPAddress.Parse("8.8.8.8")),
-            new IpAddressData("Level 3",IPAddress.Parse("4.2.2.2")),
-            new IpAddressData("Open DNS",IPAddress.Parse("208.67.222.222")),
-        };
-        public List<IpAddressData> AddAddresses = new List<IpAddressData>();  
-        public List<IpAddressData> RemoveAddresses = new List<IpAddressData>(); 
-        public float Interval = 3f;
+        private Config _config;
         private bool _stop = true;
-        public int TimeOut = 4000;
-        public int SleepInterval = 1000;
         private DateTime _lastTime;
 
         public FailPeriod ActiveFail;
@@ -69,6 +59,24 @@ namespace NetworkStatusMonitor
         public int SuccessCount = 0;
         public int PartialCount = 0;
         public int FailCount = 0;
+        public List<IpAddressData> IpAddresses = new List<IpAddressData>()
+        {
+            new IpAddressData("Google DNS", IPAddress.Parse("8.8.8.8")),
+            new IpAddressData("Level 3",IPAddress.Parse("4.2.2.2")),
+            new IpAddressData("Open DNS",IPAddress.Parse("208.67.222.222")),
+        };
+        public List<IpAddressData> AddAddresses = new List<IpAddressData>();  
+        public List<IpAddressData> RemoveAddresses = new List<IpAddressData>();
+
+        public UptimeMonitor(Config config)
+        {
+            _config = config;
+        }
+
+        public float Interval => _config.GetFloatSetting(ConfigSection.Monitor, ConfigSetting.Frequency);        
+        public int TimeOut => _config.GetIntSetting(ConfigSection.Monitor, ConfigSetting.TimeOut);
+        public int SleepInterval => _config.GetIntSetting(ConfigSection.Monitor, ConfigSetting.SleepPeriod);
+
 
         public void Monitor()
         {

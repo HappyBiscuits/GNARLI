@@ -1,21 +1,27 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using System.Text;
+﻿using System;
+using System.Security.Policy;
 using System.Threading;
 
-namespace NetworkStatusMonitor
+namespace GNARLI
 {
-    
+
 
     class Program
     {
+
+
         static void Main(string[] args)
         {
-            var monitor = new UptimeMonitor();
+            var config = new Config();
+            config.LoadConfig();
+            config.SaveConfig();
+            var monitor = new UptimeMonitor(config);
             new Thread(monitor.Monitor).Start();
-            var ui = new UptimeMonitorUi {Monitor = monitor};
+            var ui = new UptimeMonitorUi(config, monitor);
             new Thread(ui.Update).Start();
-              
+
 
         }
+
     }
 }
