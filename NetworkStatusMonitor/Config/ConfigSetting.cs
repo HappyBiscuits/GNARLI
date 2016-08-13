@@ -5,6 +5,7 @@ namespace GNARLI
         Frequency,
         TimeOut,
         SleepPeriod,
-
+        LogPingReply,
+        LogActiveFail
     }
 }

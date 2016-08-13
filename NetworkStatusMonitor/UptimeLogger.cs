@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.NetworkInformation;
+﻿using System.Net.NetworkInformation;
 using log4net;
 
 namespace GNARLI
@@ -7,17 +6,19 @@ namespace GNARLI
     public class UptimeLogger
     {
         private readonly ILog log;
-        public bool logStatus { get; set; }
+        private readonly Config config;
+        private bool logPingReply =>  this.config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogPingReply);
+        private bool logActiveFail => this.config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogActiveFail);
 
-        public UptimeLogger(ILog log)
+        public UptimeLogger(ILog log, Config config)
         {
             this.log = log;
-            this.logStatus = true;
+            this.config = config;
         }
 
         public void LogPingReply(PingReply pingReply)
         {
-            if (logStatus)
+            if (logPingReply)
             {
                 if (pingReply.Status == IPStatus.Success)
                     log.Info($"{pingReply.Status.ToString()} : {pingReply.Address.MapToIPv4()} : {pingReply.RoundtripTime}");
@@ -27,9 +28,9 @@ namespace GNARLI
             }
         }
 
-        internal void LogActiveFail(FailPeriod activeFail)
+        public void LogActiveFail(FailPeriod activeFail)
         {
-            if (logStatus)
+            if (logActiveFail)
             {
                 log.Info($"Active Fail Time: {activeFail.FailTime} : Return Time {activeFail.ReturnTime}");
             }

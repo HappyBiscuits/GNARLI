@@ -13,6 +13,7 @@ namespace GNARLI
         private UptimeMonitor _monitor;
         public int SleepTime = 500;
         public bool Updating = false;
+        private string loggingStatus = "ENABLED";
 
         public UptimeMonitorUi(Config config, UptimeMonitor monitor)
         {
@@ -62,7 +63,7 @@ namespace GNARLI
             Console.WriteLine(new string('-', 80));
             Console.WriteLine("V Resume Viewing");
             Console.WriteLine("S Start/Stop Monitoring");
-            //Console.WriteLine("L Start/Stop Logging");
+            Console.WriteLine("L Start/Stop Logging");
             //Console.WriteLine("C Clear Log");
             //Console.WriteLine("O Set Log Location");
             Console.WriteLine("A Add New Address");
@@ -83,6 +84,12 @@ namespace GNARLI
                     {
                         if (_monitor.IsRunning()) _monitor.StopMonitor();
                         else new Thread(_monitor.Monitor).Start();
+                        Options();
+                        break;
+                    }
+                case (ConsoleKey.L):
+                    {
+                        ToggleLogging();
                         Options();
                         break;
                     }
@@ -265,15 +272,24 @@ namespace GNARLI
             }
             Console.Write(header);
             Console.ResetColor();
-            Console.Write(String.Format("{0,25}", "Logging: "));
-                Console.ForegroundColor = ConsoleColor.Red;
-                header = "STOPPED";
-            Console.WriteLine(header);
-            Console.ResetColor();
 
-
+            DisplayLoggingStatus();
         }
 
+        private void DisplayLoggingStatus()
+        {
+            Console.Write(String.Format("{0,25}", "Logging: "));
+            Console.ForegroundColor = ConsoleColor.Red;
+
+            if (loggingStatus == "ENABLED")
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+
+            Console.WriteLine(loggingStatus);
+            Console.ResetColor();
+        }
+   
         private void Settings()
         {
             Console.Write(string.Format("{0, 23}", "Timeout: " + _monitor.TimeOut + "ms"));
@@ -377,6 +393,19 @@ namespace GNARLI
 
         }
 
+        private void ToggleLogging()
+        {
+            _config.SetBoolSetting(ConfigSection.Logging, ConfigSetting.LogPingReply, !_config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogPingReply));
+            _config.SetBoolSetting(ConfigSection.Logging, ConfigSetting.LogActiveFail, !_config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogActiveFail));
 
+            if(_config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogPingReply))
+            {
+                loggingStatus = "ENABLED";
+            }
+            else
+            {
+                loggingStatus = "DISABLED";
+            }
+        }
     }
 }

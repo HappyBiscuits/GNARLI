@@ -16,7 +16,8 @@ namespace GNARLI
             new FloatConfigValue(ConfigSection.Monitor, ConfigSetting.Frequency, 3f),
             new IntConfigValue(ConfigSection.Monitor, ConfigSetting.TimeOut, 4000),
             new IntConfigValue(ConfigSection.Monitor, ConfigSetting.SleepPeriod, 1000),
-
+            new BoolConfigValue(ConfigSection.Logging, ConfigSetting.LogPingReply,true),
+            new BoolConfigValue(ConfigSection.Logging, ConfigSetting.LogActiveFail, true)
         };
 
         public List<IpAddressData> IpAddressData = new List<IpAddressData>()
@@ -48,8 +49,6 @@ namespace GNARLI
             {
                 IpAddressData = addrs;
             }
-            
-
         }
 
         private void SaveIpAddressDatas(IniData data)
@@ -90,21 +89,37 @@ namespace GNARLI
             if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
             return ((IntConfigValue) Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value;
         }
+
         public float GetFloatSetting(ConfigSection section, ConfigSetting setting)
         {
             if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
             return ((FloatConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value;
         }
+
+        public bool GetBoolSetting(ConfigSection section, ConfigSetting setting)
+        {
+            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
+            return ((BoolConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value;
+        }
+
         public void SetIntSetting(ConfigSection section, ConfigSetting setting, int value)
         {
             if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
-            ((IntConfigValue) Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value = value;
+            ((IntConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value = value;
             SaveConfig();
         }
+
         public void SetFloatSetting(ConfigSection section, ConfigSetting setting, float value)
         {
             if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
             ((FloatConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value = value;
+            SaveConfig();
+        }
+
+        public void SetBoolSetting(ConfigSection section, ConfigSetting setting, bool value)
+        {
+            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
+            ((BoolConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value = value;
             SaveConfig();
         }
 
@@ -122,7 +137,6 @@ namespace GNARLI
             {
                 setting.ReadData(data);
             }
-
         }
 
         public void SaveConfig()

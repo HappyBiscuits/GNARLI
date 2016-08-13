@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\BoolConfigValue.cs" />
     <Compile Include="Config\Config.cs" />
     <Compile Include="Config\ConfigSection.cs" />
     <Compile Include="Config\ConfigSetting.cs" />

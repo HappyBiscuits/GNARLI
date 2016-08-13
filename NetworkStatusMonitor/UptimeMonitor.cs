@@ -52,21 +52,22 @@ namespace GNARLI
         public int SuccessCount = 0;
         public int PartialCount = 0;
         public int FailCount = 0;
-        public UptimeLogger UptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"));
 
         public List<IpAddressData> IpAddresses => _config.IpAddressData;
         public List<IpAddressData> AddAddresses = new List<IpAddressData>();  
-        public List<IpAddressData> RemoveAddresses = new List<IpAddressData>(); 
+        public List<IpAddressData> RemoveAddresses = new List<IpAddressData>();
+        public UptimeLogger UptimeLogger;
 
         public UptimeMonitor(Config config)
         {
             _config = config;
+            UptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"), _config);
         }
 
         public float Interval => _config.GetFloatSetting(ConfigSection.Monitor, ConfigSetting.Frequency);        
         public int TimeOut => _config.GetIntSetting(ConfigSection.Monitor, ConfigSetting.TimeOut);
         public int SleepInterval => _config.GetIntSetting(ConfigSection.Monitor, ConfigSetting.SleepPeriod);
-
+        public bool LogPingReply => _config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogPingReply);
 
         public void Monitor()
         {
