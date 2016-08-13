@@ -8,10 +8,6 @@ using System.Threading.Tasks;
 
 namespace GNARLI
 {
-    public class UptimeSettings
-    {
-        
-    }
     public class UpTimeLog
     {
         public IpAddressData Address;
@@ -46,7 +42,7 @@ namespace GNARLI
 
     public class UptimeMonitor
     {
-        private Config _config;
+        private readonly Config _config;
         private bool _stop = true;
         private DateTime _lastTime;
 
