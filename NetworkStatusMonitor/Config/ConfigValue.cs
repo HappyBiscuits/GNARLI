@@ -1,20 +1,21 @@
+using System;
 using IniParser.Model;
 
 namespace GNARLI
 {
-    public abstract class ConfigValue<T> : IConfigValue
+    public abstract class ConfigValue<T, TSection, TSetting> : IConfigValue<TSection, TSetting>
     {
-        public ConfigSection Section;
-        public ConfigSetting Setting;
+        public TSection Section;
+        public TSetting Setting;
         public T Value;
         public T DefaultValue;
 
-        public ConfigSection GetSection()
+        public TSection GetSection()
         {
             return Section;
         }
 
-        public ConfigSetting GetSetting()
+        public TSetting GetSetting()
         {
             return Setting;
         }
@@ -25,7 +26,7 @@ namespace GNARLI
             data[Section.ToString()][Setting.ToString()] = Value.ToString();
         }
 
-        protected ConfigValue(ConfigSection section, ConfigSetting setting, T defaultValue)
+        protected ConfigValue(TSection section, TSetting setting, T defaultValue)
         {
             Section = section;
             Setting = setting;

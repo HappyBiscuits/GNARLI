@@ -1,125 +1,72 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using IniParser;
 using IniParser.Model;
 
 namespace GNARLI
 {
-    public class Config
+
+
+    public class Config<TSection, TValues> where TSection : struct, IComparable where TValues : struct, IComparable
     {
-        private string _configPath = "Config.ini";
-        public List<IConfigValue> Settings = new List<IConfigValue>()
-        {
-            new FloatConfigValue(ConfigSection.Monitor, ConfigSetting.Frequency, 3f),
-            new IntConfigValue(ConfigSection.Monitor, ConfigSetting.TimeOut, 4000),
-            new IntConfigValue(ConfigSection.Monitor, ConfigSetting.SleepPeriod, 1000),
-            new BoolConfigValue(ConfigSection.Logging, ConfigSetting.LogPingReply,true),
-            new BoolConfigValue(ConfigSection.Logging, ConfigSetting.LogActiveFail, true)
-        };
+        private readonly string _configPath;
+        public List<IConfigValue<TSection, TValues>> Settings;
+        public List<IDynamicConfig> DynamicConfigs; 
 
-        public List<IpAddressData> IpAddressData = new List<IpAddressData>()
+        public Config(string path, List<IConfigValue<TSection, TValues>> defaults, List<IDynamicConfig> dynamicConfigs = null)
         {
-            new IpAddressData("Google DNS", IPAddress.Parse("8.8.8.8")),
-            new IpAddressData("Level 3",IPAddress.Parse("4.2.2.2")),
-            new IpAddressData("Open DNS",IPAddress.Parse("208.67.222.222")),
-        }; 
-
-        private void LoadIpAddressDatas(IniData data)
-        {
-            var loop = true;
-            var i = 0;
-            var addrs = new List<IpAddressData>();
-            do
-            {
-                var dat = "IPAddress" + i;
-                if (data.Sections.ContainsSection(dat))
-                {
-                    addrs.Add(GetIpAddressData(data[dat]));
-                    i++;
-                }
-                else
-                {
-                    loop = false;
-                }
-            } while (loop);
-            if (addrs.Count > 0)
-            {
-                IpAddressData = addrs;
-            }
+            _configPath = path;
+            Settings = defaults;
+            if (dynamicConfigs == null) DynamicConfigs = new List<IDynamicConfig>();
+            else DynamicConfigs = dynamicConfigs;
         }
 
-        private void SaveIpAddressDatas(IniData data)
+        private bool HasSetting(TSection section, TValues setting)
         {
-            for (var i = 0; i < IpAddressData.Count; i++)
-            {
-                var dat = "IPAddress" + i;
-                data.Sections.AddSection(dat);
-                data[dat].AddKey("Name", IpAddressData[i].Name);
-                data[dat].AddKey("Address", IpAddressData[i].Ip.ToString());
-            }
-        }
-        private IpAddressData GetIpAddressData(KeyDataCollection data)
-        {
-
-            if (data.ContainsKey("Name") && data.ContainsKey("Address"))
-            {
-                IPAddress ip;
-                if (IPAddress.TryParse(data["Address"], out ip))
-                {
-                    return new IpAddressData(data["Name"], ip);
-                }
-                else
-                {
-                    throw new InvalidDataException(data["Address"] + " is not a valid address");
-                }
-
-            }
-            else
-            {
-                throw new InvalidDataException("Missing Ip Address Data");
-            }
-
+            return Settings.Any(x => x.GetSection().Equals(section) && x.GetSetting().Equals(setting));
         }
 
-        public int GetIntSetting(ConfigSection section, ConfigSetting setting)
+        private IConfigValue<TSection, TValues> GetSetting(TSection section, TValues setting)
         {
-            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
-            return ((IntConfigValue) Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value;
+            if (!HasSetting(section, setting)) throw new InvalidDataException("Setting is Missing");
+            return Settings.Find(x => x.GetSection().Equals(section) && x.GetSetting().Equals(setting));
         }
 
-        public float GetFloatSetting(ConfigSection section, ConfigSetting setting)
+        public int GetIntSetting(TSection section, TValues setting)
         {
-            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
-            return ((FloatConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value;
+            return ((IntConfigValue<TSection, TValues>)GetSetting(section, setting)).Value;
         }
 
-        public bool GetBoolSetting(ConfigSection section, ConfigSetting setting)
+        public float GetFloatSetting(TSection section, TValues setting)
         {
-            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
-            return ((BoolConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value;
+            return ((FloatConfigValue<TSection, TValues>)GetSetting(section, setting)).Value;
         }
 
-        public void SetIntSetting(ConfigSection section, ConfigSetting setting, int value)
+        public bool GetBoolSetting(TSection section, TValues setting)
         {
-            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
-            ((IntConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value = value;
+            return ((BoolConfigValue<TSection, TValues>)GetSetting(section, setting)).Value;
+        }
+
+        public void SetIntSetting(TSection section, TValues setting, int value)
+        {
+            ((IntConfigValue<TSection, TValues>)GetSetting(section, setting)).Value = value;
             SaveConfig();
         }
 
-        public void SetFloatSetting(ConfigSection section, ConfigSetting setting, float value)
+        public void SetFloatSetting(TSection section, TValues setting, float value)
         {
-            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
-            ((FloatConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value = value;
+            ((FloatConfigValue<TSection, TValues>)GetSetting(section, setting)).Value = value;
             SaveConfig();
         }
 
-        public void SetBoolSetting(ConfigSection section, ConfigSetting setting, bool value)
+        public void SetBoolSetting(TSection section, TValues setting, bool value)
         {
-            if (!Settings.Any(x => x.GetSection() == section && x.GetSetting() == setting)) throw new InvalidDataException("Setting is Missing");
-            ((BoolConfigValue)Settings.Find(x => x.GetSection() == section && x.GetSetting() == setting)).Value = value;
+            ((BoolConfigValue<TSection, TValues>)GetSetting(section, setting)).Value = value;
             SaveConfig();
         }
 
@@ -130,9 +77,9 @@ namespace GNARLI
             if (File.Exists(_configPath))
             {
                 data = parser.ReadFile(_configPath);
-                LoadIpAddressDatas(data);
+                DynamicConfigs.ForEach(x => x.LoadData(data));
             }
-            
+
             foreach (var setting in Settings)
             {
                 setting.ReadData(data);
@@ -146,9 +93,15 @@ namespace GNARLI
             {
                 setting.WriteData(data);
             }
-            SaveIpAddressDatas(data);
+            DynamicConfigs.ForEach(x => x.SaveData(data));
             var parser = new FileIniDataParser();
             parser.WriteFile(_configPath, data);
+        }
+
+        public IDynamicConfig GetDynamicConfig(string groupName)
+        {
+          if(DynamicConfigs.All(x => x.GetGroupName() != groupName))  throw new InvalidDataException("GroupName is not present in the dynamic config list");
+            return DynamicConfigs.Find(x => x.GetGroupName() == groupName);
         }
     }
 }

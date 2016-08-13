@@ -9,13 +9,13 @@ namespace GNARLI
 {
     public class UptimeMonitorUi
     {
-        private Config _config;
+        private Config<ConfigSection, ConfigSetting> _config;
         private UptimeMonitor _monitor;
         public int SleepTime = 500;
         public bool Updating = false;
         private string loggingStatus = "ENABLED";
 
-        public UptimeMonitorUi(Config config, UptimeMonitor monitor)
+        public UptimeMonitorUi(Config<ConfigSection, ConfigSetting> config, UptimeMonitor monitor)
         {
             _config = config;
             _monitor = monitor;

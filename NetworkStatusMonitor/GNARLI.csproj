@@ -60,6 +60,8 @@
     <Compile Include="Config\ConfigSection.cs" />
     <Compile Include="Config\ConfigSetting.cs" />
     <Compile Include="Config\ConfigValue.cs" />
+    <Compile Include="Config\DynamicConfig.cs" />
+    <Compile Include="Config\IDynamicConfig.cs" />
     <Compile Include="FailPeriod.cs" />
     <Compile Include="Config\FloatConfigValue.cs" />
     <Compile Include="Config\IConfigValue.cs" />

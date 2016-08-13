@@ -6,11 +6,11 @@ namespace GNARLI
     public class UptimeLogger
     {
         private readonly ILog log;
-        private readonly Config config;
+        private readonly Config<ConfigSection, ConfigSetting> config;
         private bool logPingReply =>  this.config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogPingReply);
         private bool logActiveFail => this.config.GetBoolSetting(ConfigSection.Logging, ConfigSetting.LogActiveFail);
 
-        public UptimeLogger(ILog log, Config config)
+        public UptimeLogger(ILog log, Config<ConfigSection, ConfigSetting> config)
         {
             this.log = log;
             this.config = config;

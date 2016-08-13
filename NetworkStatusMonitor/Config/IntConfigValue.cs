@@ -2,9 +2,9 @@ using IniParser.Model;
 
 namespace GNARLI
 {
-    public class IntConfigValue : ConfigValue<int>
+    public class IntConfigValue<TSection, TSetting> : ConfigValue<int, TSection, TSetting>
     {
-        public IntConfigValue(ConfigSection section, ConfigSetting setting, int defaultValue)
+        public IntConfigValue(TSection section, TSetting setting, int defaultValue)
             : base(section, setting, defaultValue)
         {
 

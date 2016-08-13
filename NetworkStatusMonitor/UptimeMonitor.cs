@@ -42,7 +42,8 @@ namespace GNARLI
 
     public class UptimeMonitor
     {
-        private readonly Config _config;
+        private readonly Config<ConfigSection, ConfigSetting> _config;
+        private readonly DynamicConfig<IpAddressData> _ipConfig; 
         private bool _stop = true;
         private DateTime _lastTime;
 
@@ -53,14 +54,15 @@ namespace GNARLI
         public int PartialCount = 0;
         public int FailCount = 0;
 
-        public List<IpAddressData> IpAddresses => _config.IpAddressData;
+        public List<IpAddressData> IpAddresses => _ipConfig.Data;
         public List<IpAddressData> AddAddresses = new List<IpAddressData>();  
         public List<IpAddressData> RemoveAddresses = new List<IpAddressData>();
         public UptimeLogger UptimeLogger;
 
-        public UptimeMonitor(Config config)
+        public UptimeMonitor(Config<ConfigSection, ConfigSetting> config, DynamicConfig<IpAddressData> ipConfig)
         {
             _config = config;
+            _ipConfig = ipConfig;
             UptimeLogger = new UptimeLogger(log4net.LogManager.GetLogger("uptimeLog"), _config);
         }
 

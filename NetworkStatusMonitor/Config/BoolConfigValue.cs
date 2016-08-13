@@ -2,9 +2,9 @@
 
 namespace GNARLI
 {
-    public class BoolConfigValue : ConfigValue<bool>
+    public class BoolConfigValue<TSection, TSetting> : ConfigValue<bool, TSection, TSetting>
     {
-        public BoolConfigValue(ConfigSection section, ConfigSetting setting, bool defaultValue) : base(section, setting, defaultValue)
+        public BoolConfigValue(TSection section, TSetting setting, bool defaultValue) : base(section, setting, defaultValue)
         {
         }
 
