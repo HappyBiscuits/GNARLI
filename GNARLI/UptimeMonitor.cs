@@ -9,29 +9,6 @@ using ConfigINI;
 
 namespace GNARLI
 {
-    public class UpTimeLog
-    {
-        public IpAddressData Address;
-        public List<PingResult> Pings = new List<PingResult>();
-
-        public void PopulateTest()
-        {
-            var rand = new Random();
-            for (var i = 0; i < 100; i++)
-            {
-                var date = DateTime.UtcNow.AddSeconds(-(5*(100 - i)));
-                var ping = new PingResult()
-                {
-                    Date = date,
-                    Ping = rand.Next(1000),
-                    Status = IPStatus.Success,
-                    Success = true
-                    
-                };
-                Pings.Add(ping);
-            }
-        }
-    }
 
     public class PingResult
     {
@@ -99,7 +76,6 @@ namespace GNARLI
                     CheckConnections();
 
                 }
-
 
                 Thread.Sleep(SleepInterval);
 
@@ -186,7 +162,6 @@ namespace GNARLI
             
                 }
             }
-
 
         }
     }
